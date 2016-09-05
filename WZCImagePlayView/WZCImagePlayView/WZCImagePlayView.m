@@ -69,9 +69,12 @@
 
 - (void)wzc_imagesBeginWorking{
     
-    [self startTimer];
-    
     [self loadImages];
+    
+    if (self.imagesArray.count < 2) {
+        return;
+    }
+    [self startTimer];
     
 }
 
@@ -189,6 +192,11 @@
 #pragma  mark -ScrollViewDelegate
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+    
+    if (self.imagesArray.count < 2) {
+        return;
+    }
+    
     [scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
     [self stopTimer];
     
