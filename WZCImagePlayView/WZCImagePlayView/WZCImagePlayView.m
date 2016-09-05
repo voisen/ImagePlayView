@@ -68,27 +68,27 @@
 #pragma mark - 启动
 
 - (void)wzc_imagesBeginWorking{
-
+    
     [self startTimer];
     
     [self loadImages];
-
+    
 }
 
 #pragma mark - 定时器停止操作
 
 - (void)stopTimer{
-
+    
     [self.picTimer invalidate];
     
     self.picTimer = nil;
-
+    
 }
 
 #pragma mark - 开始定时器
 
 - (void)startTimer{
-
+    
     if ([self.picTimer isValid]) {
         [self stopTimer];
     }
@@ -98,13 +98,13 @@
     [[NSRunLoop mainRunLoop] addTimer:picTimer forMode:NSRunLoopCommonModes];
     
     _picTimer = picTimer;
-
+    
 }
 
 #pragma mark - 定时器循环函数
 
 - (void)changeScrollViewContentOffset{
-
+    
     CGPoint contentOffset = self.scrollView.contentOffset;
     
     contentOffset.x += self.scrollView.frame.size.width;
@@ -128,9 +128,9 @@
     }else if (curPage == self.imagesArray.count + 1) {
         curPage = 0;
     }else{
-    
+        
         curPage -= 1;
-    
+        
     }
     
     
@@ -146,24 +146,26 @@
     CGFloat img_W = self.scrollView.frame.size.width;
     CGFloat img_H = self.scrollView.frame.size.height;
     for (int i = 0; i < self.imagesArray.count + 2; i ++) {
-        CGFloat img_X = i * img_W;
-        UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(img_X, 0, img_W, img_H)];
-        if (i == 0) {
-            imageView.image = [self.imagesArray lastObject];
-        }else{
-            imageView.image = self.imagesArray[(i - 1) % self.imagesArray.count];
-        }
-        
-        imageView.contentMode = self.wzc_imageViewContentMode;
-        
-        if (self.wzc_image_delegate) {
+        @autoreleasepool {
+            CGFloat img_X = i * img_W;
+            UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(img_X, 0, img_W, img_H)];
+            if (i == 0) {
+                imageView.image = [self.imagesArray lastObject];
+            }else{
+                imageView.image = self.imagesArray[(i - 1) % self.imagesArray.count];
+            }
             
-            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(imageViewDidChick:)];
-            [imageView addGestureRecognizer:tap];
-            imageView.userInteractionEnabled = YES;
+            imageView.contentMode = self.wzc_imageViewContentMode;
+            
+            if (self.wzc_image_delegate) {
+                
+                UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(imageViewDidChick:)];
+                [imageView addGestureRecognizer:tap];
+                imageView.userInteractionEnabled = YES;
+            }
+            
+            [self.scrollView addSubview:imageView];
         }
-        
-        [self.scrollView addSubview:imageView];
     }
     
     self.scrollView.contentOffset = CGPointMake(self.scrollView.frame.size.width, 0);
@@ -175,7 +177,7 @@
 
 
 - (void)imageViewDidChick:(UITapGestureRecognizer *)tap{
-
+    
     if ([self.wzc_image_delegate respondsToSelector:@selector(WZCImagePlayViewImageDidClickWithImageView:arrayIndex:)]) {
         
         UIImageView *imageView = (UIImageView*)tap.view;
@@ -187,23 +189,23 @@
 #pragma  mark -ScrollViewDelegate
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
-
+    [scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
     [self stopTimer];
-
+    
 }
 
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
-
-    self.picTimer = [NSTimer timerWithTimeInterval:self.wzc_resetTime target:self selector:@selector(startTimer) userInfo:nil repeats:NO];
     
+    self.picTimer = [NSTimer timerWithTimeInterval:self.wzc_resetTime target:self selector:@selector(startTimer) userInfo:nil repeats:NO];
     [[NSRunLoop currentRunLoop] addTimer:self.picTimer forMode:NSRunLoopCommonModes];
-
+    [scrollView removeObserver:self forKeyPath:@"contentOffset"];
+    
 }
 
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
-
+    
     [self changePageWithContentOffset:scrollView.contentOffset];
     
 }
@@ -214,31 +216,49 @@
  *  @param contentOffset
  */
 
-- (void)changePageWithContentOffset:(CGPoint)contentOffset{
 
+- (void)changePageWithContentOffset:(CGPoint)contentOffset{
+    
     NSInteger curPage = contentOffset.x / self.scrollView.frame.size.width;
     
     if (curPage == 0) {
         
-        contentOffset.x = self.scrollView.frame.size.width * self.imagesArray.count;
-        self.scrollView.contentOffset = contentOffset;
         curPage = self.imagesArray.count - 1;
         
     } else if (curPage > self.imagesArray.count) {
-        contentOffset.x = self.scrollView.frame.size.width;
-        self.scrollView.contentOffset = contentOffset;
+        
         curPage = 0;
+        
     }else{
-    
+        
         curPage -= 1;
         
     }
-    
     self.pageControl.currentPage = curPage;
 }
 
-- (UIPageControl *)wzc_pageControl{
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context{
+    
+    CGPoint contentOffset = [change[@"new"] CGPointValue];
+    CGPoint contentOffset_old = [change[@"old"] CGPointValue];
+    if (contentOffset.x <= self.scrollView.frame.size.width && contentOffset_old.x <= self.scrollView.frame.size.width) {
+        
+        self.scrollView.contentOffset = CGPointMake(contentOffset.x + self.scrollView.frame.size.width * self.imagesArray.count, 0);
+        
+    }
+    
+    if (contentOffset.x >= self.scrollView.frame.size.width * self.imagesArray.count) {
+        
+        self.scrollView.contentOffset = CGPointMake(((NSInteger)contentOffset.x % (NSInteger)self.scrollView.frame.size.width), 0);
+        
+    }
+    
+    
+}
+
+- (UIPageControl *)wzc_pageControl{
+    
     return self.pageControl;
 }
 
