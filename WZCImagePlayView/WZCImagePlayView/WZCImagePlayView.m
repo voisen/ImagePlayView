@@ -36,7 +36,9 @@
         self.imagesArray = images;
         {
             UIScrollView *scrollView = [[UIScrollView alloc]initWithFrame:self.bounds];
-            scrollView.contentSize = CGSizeMake(scrollView.frame.size.width * (self.imagesArray.count + 2), 0);
+            if (self.imagesArray.count > 1) {
+                scrollView.contentSize = CGSizeMake(scrollView.frame.size.width * (self.imagesArray.count + 2), 0);
+            }
             scrollView.showsHorizontalScrollIndicator = NO;
             scrollView.showsVerticalScrollIndicator = NO;
             scrollView.pagingEnabled = YES;
@@ -69,12 +71,14 @@
 
 - (void)wzc_imagesBeginWorking{
     
+    
     [self loadImages];
     
     if (self.imagesArray.count < 2) {
         return;
     }
     [self startTimer];
+    
     
 }
 
@@ -148,6 +152,13 @@
     
     CGFloat img_W = self.scrollView.frame.size.width;
     CGFloat img_H = self.scrollView.frame.size.height;
+    
+    NSInteger imageNum = self.imagesArray.count;
+    
+    if (self.imagesArray.count >= 2) {
+        imageNum += 2;
+    }
+    
     for (int i = 0; i < self.imagesArray.count + 2; i ++) {
         @autoreleasepool {
             CGFloat img_X = i * img_W;
