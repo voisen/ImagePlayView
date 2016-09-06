@@ -59,15 +59,21 @@
 
 1.构造轮播器
 ````objc 
-WZCImagePlayView *sv = [[WZCImagePlayView alloc]initWithFrame:
-                    CGRectMake(0, 100, self.view.frame.size.width, 250) images:self.images];
+
+    WZCImagePlayView *sv = [[WZCImagePlayView alloc]initWithFrame:
+                CGRectMake(0, 100, self.view.frame.size.width, 250) 
+                images:@[[UIImage imageNamed:@"image_01.png"],
+                        [UIImage imageNamed:@"image_02.png"],
+                        [UIImage imageNamed:@"image_03.png"],
+                        [UIImage imageNamed:@"image_04.png"]];
 ````
-或者
+OR
 
 ````objc
 
     WZCImagePlayView *sv = [[WZCImagePlayView alloc]initWithFrame:
-                            CGRectMake(0, 100, self.view.frame.size.width, 250) imagesUrlString:@[@"http://img15.3lian.com/2015/f1/111/d/21.jpg",
+                            CGRectMake(0, 100, self.view.frame.size.width, 250) 
+                            imagesUrlString:@[@"http://img15.3lian.com/2015/f1/111/d/21.jpg",
                                 @"http://img542.ph.126.net/628N3hbbFOq9uQcDTcPkMg==/2657968205079899331.jpg",
                                 @"http://i3.s1.dpfile.com/pc/wed/cc16550a87068ad57789a07eee29c54e%28640c480%29/thumb.jpg",
                                 @"http://i3.s1.dpfile.com/pc/wed/beace58b60543e50e1e7e7d3a8d1d68c%28640c480%29/thumb.jpg",] 
@@ -78,8 +84,8 @@ WZCImagePlayView *sv = [[WZCImagePlayView alloc]initWithFrame:
 ````objc
 
     sv.wzc_image_delegate = self;
-    sv.wzc_intervalTime = 1.5;
-    sv.wzc_resetTime = 3;
+    sv.wzc_intervalTime = 1.5; //设置间隔时间
+    sv.wzc_resetTime = 3;    //设置重启时间
     sv.wzc_pageControl.currentPageIndicatorTintColor = [UIColor whiteColor];
 
 ````
