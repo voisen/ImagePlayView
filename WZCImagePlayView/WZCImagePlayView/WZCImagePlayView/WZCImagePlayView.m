@@ -177,7 +177,7 @@ typedef NS_ENUM(NSInteger, WZCImagePlayerImagesType) {
     NSInteger curPage = contentOffset.x / self.scrollView.frame.size.width;
     
     if (curPage == 1) {
-        curPage = self.imagesArray.count - 1;
+        curPage = self.imagesArray.count;
     }else if (curPage == self.imagesArray.count + 1) {
         curPage = 0;
     }else{
